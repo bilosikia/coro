@@ -31,7 +31,7 @@ public:
     void stop();
 
     template<class R>
-    void spawn(Task<R> task) {
+    void spawn(task task) {
 
     }
 };
