@@ -1,9 +1,10 @@
 add_library(coro
-        lib.cpp
-        runtime/runtime_handle.cpp
-        runtime/runtime.cpp
-        runtime/worker.cpp
-        runtime/driver.cpp
+        lib.cc
+        runtime/runtime_handle.cc
+        runtime/runtime.cc
+        runtime/worker.cc
+        runtime/driver.cc
+        runtime/runtime_task.cc
 )
 
 target_include_directories(coro PUBLIC ../include/)

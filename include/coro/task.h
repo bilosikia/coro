@@ -3,87 +3,103 @@
 #include "util/noncopyable.h"
 #include <experimental/coroutine>
 
-template <typename T> class task;
+template <typename T>
+class task;
 
 class promise_type_base : noncopyable {
-  public:
+public:
     struct final_awaitable {
         bool await_ready() const noexcept { return false; }
 
         template <typename PromiseType>
         std::experimental::coroutine_handle<> await_suspend(
-            std::experimental::coroutine_handle<PromiseType> coro) noexcept {
+            std::experimental::coroutine_handle<PromiseType> coro) noexcept
+        {
             if (coro.promise().continuation_) {
                 return coro.promise().continuation_;
             }
             return std::experimental::noop_coroutine();
         }
 
-        void await_resume() noexcept {}
+        void await_resume() noexcept { }
     };
 
-    std::experimental::suspend_always initial_suspend() noexcept {
-        return std::experimental::suspend_always{};
+    std::experimental::suspend_always initial_suspend() noexcept
+    {
+        return std::experimental::suspend_always {};
     }
 
-    final_awaitable final_suspend() noexcept { return final_awaitable{}; }
+    final_awaitable final_suspend() noexcept { return final_awaitable {}; }
 
     void unhandled_exception() noexcept { std::terminate(); }
 
-    void set_continuation(std::experimental::coroutine_handle<> continuation) {
+    void set_continuation(std::experimental::coroutine_handle<> continuation)
+    {
         continuation_ = continuation;
     }
 
-  private:
+private:
     std::experimental::coroutine_handle<> continuation_;
 };
 
-template <typename T> class promise_type final : public promise_type_base {
-  public:
-    task<T> get_return_object() noexcept {
-        return task{
+template <typename T>
+class promise_type final : public promise_type_base {
+public:
+    task<T> get_return_object() noexcept
+    {
+        return task {
             std::experimental::coroutine_handle<promise_type>::from_promise(
-                *this)};
+                *this)
+        };
     }
 
-    void return_value(T value) {
+    void return_value(T value)
+    {
         result_ = value;
         return;
     }
 
     T result() { return result_; }
 
-  private:
+private:
     T result_;
 };
 
-template <> class promise_type<void> final : public promise_type_base {
-  public:
+template <>
+class promise_type<void> final : public promise_type_base {
+public:
     task<void> get_return_object() noexcept;
 
-    void return_void() {}
+    void return_void() { }
 };
 
-template <typename T = void> class task : public noncopyable {
-  public:
+template <typename T = void>
+class task : public noncopyable {
+public:
     using promise_type = promise_type<T>;
     using value_type = T;
 
     task() noexcept = default;
 
     task(std::experimental::coroutine_handle<promise_type> coro)
-        : coroutine_(coro) {}
+        : coroutine_(coro)
+    {
+    }
 
-    ~task() {
+    ~task()
+    {
         if (coroutine_) {
             coroutine_.destroy();
         }
     }
 
-    task(task &&task) noexcept
-        : coroutine_(std::exchange(task.coroutine_, nullptr)) {}
+    task(task&& task) noexcept
+        : coroutine_(std::exchange(task.coroutine_, nullptr))
+    {
+    }
 
-    task &operator=(task &&task) noexcept {
+    task& operator=(task&& task) noexcept
+    {
         if (std::addressof(task) != this) {
             if (coroutine_) {
                 coroutine_.destroy();
@@ -94,35 +110,40 @@ template <typename T = void> class task : public noncopyable {
     }
 
     struct awaiter : noncopyable {
-      public:
-        using coroutine_handle =
-            std::experimental::coroutine_handle<promise_type>;
+    public:
+        using coroutine_handle = std::experimental::coroutine_handle<promise_type>;
         coroutine_handle coroutine_;
 
-        explicit awaiter(coroutine_handle coro) : coroutine_(coro){};
+        explicit awaiter(coroutine_handle coro)
+            : coroutine_(coro) {};
 
-        bool await_ready() const noexcept {
+        bool await_ready() const noexcept
+        {
             return !coroutine_ || coroutine_.done();
         }
 
         std::experimental::coroutine_handle<> await_suspend(
-            std::experimental::coroutine_handle<> awaiting_coro) noexcept {
+            std::experimental::coroutine_handle<> awaiting_coro) noexcept
+        {
             coroutine_.promise().set_continuation(awaiting_coro);
             return coroutine_;
         }
 
-        decltype(auto) await_resume() {
+        decltype(auto) await_resume()
+        {
             return this->coroutine_.promise().result();
         }
     };
 
-    awaiter operator co_await() const &noexcept { return awaiter{coroutine_}; }
+    awaiter operator co_await() const& noexcept { return awaiter { coroutine_ }; }
 
-  public:
+public:
     std::experimental::coroutine_handle<promise_type> coroutine_;
 };
 
-task<void> promise_type<void>::get_return_object() noexcept {
-    return task{
-        std::experimental::coroutine_handle<promise_type>::from_promise(*this)};
+task<void> promise_type<void>::get_return_object() noexcept
+{
+    return task {
+        std::experimental::coroutine_handle<promise_type>::from_promise(*this)
+    };
 }
