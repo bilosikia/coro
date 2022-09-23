@@ -3,35 +3,29 @@
 #include "driver.h"
 #include "util/noncopyable.h"
 #include <atomic>
+#include <experimental/coroutine>
 #include <memory>
 #include <mutex>
-
-enum WorkerState {
-    NOT_START = 1,
-    RUNING = 2,
-    EXITING = 3,
-    EXITED = 4
-};
+#include <queue>
+#include <thread>
 
 class Worker : public noncopyable {
-    using SharedDriver = std::shared_ptr<Driver>;
-
 public:
+    Worker() = default;
 
-
-private:
-    std::atomic_bool need_exit_;
-    WorkerState state_;
-    SharedDriver driver_;
-    std::mutex driver_mutex_;
-    // 如何只有一种类型
-    std::queue<Task>
-
-public :
     void run();
-
     void stop();
 
+    void add_runable_coro(std::experimental::coroutine_handle<> coro);
+
 private:
-    void handle_exit();
+    std::queue<std::experimental::coroutine_handle<>> drain_runable_queue();
+
+private:
+    std::atomic_bool need_exit_ = false;
+
+    std::mutex runable_coros_mutex_;
+    std::queue<std::experimental::coroutine_handle<>> runable_coros_;
+
+    std::thread thread_;
 };

@@ -1,29 +1,36 @@
 #pragma once
 
-#include "worker.h"
 #include "task.h"
 #include "util/noncopyable.h"
-#include "runtime_task.h"
-#include <thread>
+#include "worker.h"
+#include <array>
 #include <memory>
-#include <vector>
+#include <thread>
 #include <unordered_map>
+#include <vector>
 
 class Runtime : public noncopyable {
-private:
-    int core_ = 4;
-    std::vector<Worker> workers_;
-
-    std::mutex tasks_mutex_;
-    std::unordered_map<void *, RuntimeTask> tasks_;
 public:
-    Runtime();
+    using Task = task<void>;
 
+    Runtime();
     ~Runtime();
+    Runtime(Runtime&&) = delete;
+    Runtime& operator=(Runtime&&) = delete;
 
 public:
     void start();
     void stop();
     void spawn(task<void> task);
-    void remove_task(void *key);
+    void remove_task(void* key);
+
+private:
+    Worker& get_idl_worker();
+
+private:
+    int core_ = 4;
+    std::array<Worker, 4> workers_;
+
+    std::mutex tasks_mutex_;
+    std::unordered_map<void*, Task> tasks_;
 };

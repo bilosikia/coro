@@ -4,7 +4,7 @@ add_library(coro
         runtime/runtime.cc
         runtime/worker.cc
         runtime/driver.cc
-        runtime/runtime_task.cc
+        runtime/task.cc
 )
 
 target_include_directories(coro PUBLIC ../include/)

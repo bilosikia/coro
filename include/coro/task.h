@@ -5,6 +5,7 @@
 
 template <typename T>
 class task;
+class Runtime;
 
 class promise_type_base : noncopyable {
 public:
@@ -38,8 +39,15 @@ public:
         continuation_ = continuation;
     }
 
+    void set_runtime(Runtime* runtime)
+    {
+        runtime_ = runtime;
+    }
+
 private:
-    std::experimental::coroutine_handle<> continuation_;
+    std::experimental::coroutine_handle<> continuation_ = nullptr;
+    // runtime spawn task
+    Runtime* runtime_ = nullptr;
 };
 
 template <typename T>
@@ -140,10 +148,3 @@ public:
 public:
     std::experimental::coroutine_handle<promise_type> coroutine_;
 };
-
-task<void> promise_type<void>::get_return_object() noexcept
-{
-    return task {
-        std::experimental::coroutine_handle<promise_type>::from_promise(*this)
-    };
-}

@@ -1,10 +1,8 @@
 #include "coro/runtime.h"
 #include "coro/runtime_handle.h"
 
-Runtime&
-Runtime::operator=(const Runtime&& r)
+Runtime::Runtime()
 {
-    core_ = r.core_;
 }
 
 Runtime::~Runtime()
@@ -17,6 +15,8 @@ void Runtime::start()
     for (auto& worker : workers_) {
         worker.run();
     }
+    while (true)
+        ;
 }
 
 void Runtime::stop()
@@ -26,17 +26,24 @@ void Runtime::stop()
     }
 }
 
-void Runtime::spawn(task<void> t)
+void Runtime::spawn(Task t)
 {
-    auto runtime_task = [](task<void> t) -> RuntimeTask {
-        co_await t;
-        co_return;
-    }();
+    t.coroutine_.promise().set_runtime(this);
+    auto guard = std::lock_guard(tasks_mutex_);
+    auto handle = t.coroutine_;
+    tasks_[t.coroutine_.address()] = std::move(t);
 
+    auto& idl_worker = get_idl_worker();
+    idl_worker.add_runable_coro(handle);
 }
 
 void Runtime::remove_task(void* key)
 {
     auto guard = std::lock_guard(tasks_mutex_);
     tasks_.erase(key);
+}
+
+Worker& Runtime::get_idl_worker()
+{
+    return workers_[0];
 }
