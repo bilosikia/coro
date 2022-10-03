@@ -14,7 +14,9 @@ Runtime::~Runtime()
 
 void Runtime::start()
 {
-    for (auto& worker : workers_) {
+    for (int i = 0; i < workers_.size(); i++) {
+        auto& worker = workers_[i];
+        worker.set_num(i);
         worker.run();
     }
 }
@@ -31,9 +33,12 @@ void Runtime::spawn(Task t)
     SPDLOG_INFO("spawn task");
 
     t.coroutine_.promise().set_runtime(this);
-    auto guard = std::lock_guard(tasks_mutex_);
     auto handle = t.coroutine_;
-    tasks_[t.coroutine_.address()] = std::move(t);
+
+    {
+        auto guard = std::lock_guard(tasks_mutex_);
+        tasks_[t.coroutine_.address()] = std::move(t);
+    }
 
     auto& idl_worker = get_idl_worker();
     idl_worker.add_runable_coro(handle);
@@ -41,6 +46,7 @@ void Runtime::spawn(Task t)
 
 void Runtime::remove_task(void* key)
 {
+    SPDLOG_INFO("remove task");
     auto guard = std::lock_guard(tasks_mutex_);
     tasks_.erase(key);
 }
@@ -48,4 +54,9 @@ void Runtime::remove_task(void* key)
 Worker& Runtime::get_idl_worker()
 {
     return workers_[0];
+}
+
+bool Runtime::has_task(void* key)
+{
+    return tasks_.contains(key);
 }

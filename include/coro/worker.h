@@ -12,6 +12,10 @@
 class Worker : public noncopyable {
 public:
     Worker() = default;
+    ~Worker();
+
+    std::string name();
+    void set_num(int num);
 
     void run();
     void stop();
@@ -22,6 +26,7 @@ private:
     std::queue<std::experimental::coroutine_handle<>> drain_runable_queue();
 
 private:
+    int num_;
     std::atomic_bool need_exit_ = false;
 
     std::mutex runable_coros_mutex_;

@@ -23,6 +23,7 @@ public:
     void stop();
     void spawn(task<void> task);
     void remove_task(void* key);
+    bool has_task(void* key);
 
 private:
     Worker& get_idl_worker();

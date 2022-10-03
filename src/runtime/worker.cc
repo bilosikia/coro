@@ -1,6 +1,11 @@
 #include "coro/worker.h"
 #include "spdlog/spdlog.h"
 
+Worker::~Worker()
+{
+    thread_.join();
+}
+
 void Worker::run()
 {
     auto f = [this]() {
@@ -16,10 +21,10 @@ void Worker::run()
                 coro.resume();
             }
         }
-        SPDLOG_INFO("worker exited");
+        SPDLOG_INFO("{} exited", name());
     };
 
-    SPDLOG_INFO("worker stared");
+    SPDLOG_INFO("{} stared", name());
     thread_ = std::thread(f);
 }
 
@@ -43,4 +48,14 @@ std::queue<std::experimental::coroutine_handle<>> Worker::drain_runable_queue()
     std::swap(runable_coros_, queue);
 
     return queue;
+}
+
+std::string Worker::name()
+{
+    return std::string("worker-") + std::to_string(num_);
+}
+
+void Worker::set_num(int num)
+{
+    num_ = num;
 }

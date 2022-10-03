@@ -33,9 +33,16 @@ TEST_CASE("runtime_spawn_task")
 {
     auto runtime = Runtime {};
     auto task = h();
+    auto coroutine_handle = task.coroutine_;
     runtime.spawn(std::move(task));
+
+    assert(runtime.has_task(coroutine_handle.address()) == true);
+
     runtime.start();
     std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    assert(runtime.has_task(task.coroutine_.address()) == false);
+
     runtime.stop();
     std::this_thread::sleep_for(std::chrono::seconds(2));
 }

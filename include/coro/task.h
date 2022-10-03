@@ -16,8 +16,13 @@ public:
         std::experimental::coroutine_handle<> await_suspend(
             std::experimental::coroutine_handle<PromiseType> coro) noexcept
         {
-            if (coro.promise().continuation_) {
+            promise_type_base& promise = coro.promise();
+            if (promise.continuation_) {
                 return coro.promise().continuation_;
+            }
+            if (promise.runtime_) {
+                assert(promise.continuation_ == nullptr);
+                promise.remove_from_runtime(promise.continuation_.address());
             }
             return std::experimental::noop_coroutine();
         }
@@ -43,6 +48,8 @@ public:
     {
         runtime_ = runtime;
     }
+
+    void remove_from_runtime(void* key);
 
 private:
     std::experimental::coroutine_handle<> continuation_ = nullptr;
