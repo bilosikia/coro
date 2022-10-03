@@ -35,4 +35,7 @@ TEST_CASE("runtime_spawn_task")
     auto task = h();
     runtime.spawn(std::move(task));
     runtime.start();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    runtime.stop();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 }

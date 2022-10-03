@@ -1,3 +1,5 @@
+#include <spdlog/spdlog.h>
+
 #include "coro/runtime.h"
 #include "coro/runtime_handle.h"
 
@@ -15,8 +17,6 @@ void Runtime::start()
     for (auto& worker : workers_) {
         worker.run();
     }
-    while (true)
-        ;
 }
 
 void Runtime::stop()
@@ -28,6 +28,8 @@ void Runtime::stop()
 
 void Runtime::spawn(Task t)
 {
+    SPDLOG_INFO("spawn task");
+
     t.coroutine_.promise().set_runtime(this);
     auto guard = std::lock_guard(tasks_mutex_);
     auto handle = t.coroutine_;

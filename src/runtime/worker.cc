@@ -1,11 +1,12 @@
 #include "coro/worker.h"
+#include "spdlog/spdlog.h"
 
 void Worker::run()
 {
     auto f = [this]() {
         while (true) {
             if (need_exit_) {
-                return;
+                break;
             }
 
             auto runable_coros = drain_runable_queue();
@@ -15,7 +16,10 @@ void Worker::run()
                 coro.resume();
             }
         }
+        SPDLOG_INFO("worker exited");
     };
+
+    SPDLOG_INFO("worker stared");
     thread_ = std::thread(f);
 }
 
