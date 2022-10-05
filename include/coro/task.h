@@ -2,6 +2,7 @@
 
 #include "util/noncopyable.h"
 #include <experimental/coroutine>
+#include <cassert>
 
 template <typename T>
 class task;
