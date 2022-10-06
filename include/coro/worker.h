@@ -9,6 +9,8 @@
 #include <queue>
 #include <thread>
 
+class Runtime;
+
 class Worker : public noncopyable {
 public:
     Worker() = default;
@@ -16,6 +18,7 @@ public:
 
     std::string name();
     void set_num(int num);
+    void set_runtime(Runtime* runtime);
 
     void run();
     void stop();
@@ -33,4 +36,5 @@ private:
     std::queue<std::experimental::coroutine_handle<>> runable_coros_;
 
     std::thread thread_;
+    Runtime* runtime_;
 };

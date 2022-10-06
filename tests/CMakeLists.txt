@@ -4,9 +4,12 @@ project(tests VERSION 0.0.1 LANGUAGES CXX)
 set(LIB_SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 add_executable(tests
     task.cc
+    io.cc
     ${LIB_SRC_DIR}/runtime/runtime.cc
     ${LIB_SRC_DIR}/runtime/worker.cc
     ${LIB_SRC_DIR}/runtime/task.cc
+    ${LIB_SRC_DIR}/runtime/driver.cc
+    ${LIB_SRC_DIR}/io/socket.cc
 )
 
 # include dir

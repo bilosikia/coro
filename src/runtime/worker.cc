@@ -1,5 +1,6 @@
 #include "coro/worker.h"
 #include "spdlog/spdlog.h"
+#include "coro/runtime.h"
 
 Worker::~Worker()
 {
@@ -9,6 +10,8 @@ Worker::~Worker()
 void Worker::run()
 {
     auto f = [this]() {
+        set_runtime_context(this->runtime_);
+
         while (true) {
             if (need_exit_) {
                 break;
@@ -20,6 +23,8 @@ void Worker::run()
                 runable_coros.pop();
                 coro.resume();
             }
+
+            runtime_->get_driver().poll();
         }
         SPDLOG_INFO("{} exited", name());
     };
@@ -58,4 +63,9 @@ std::string Worker::name()
 void Worker::set_num(int num)
 {
     num_ = num;
+}
+
+void Worker::set_runtime(Runtime* runtime)
+{
+    runtime_ = runtime;
 }

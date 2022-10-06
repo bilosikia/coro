@@ -1,11 +1,8 @@
 #include <spdlog/spdlog.h>
 
 #include "coro/runtime.h"
-#include "coro/runtime_handle.h"
 
-Runtime::Runtime()
-{
-}
+thread_local Runtime* rt_context;
 
 Runtime::~Runtime()
 {
@@ -14,9 +11,11 @@ Runtime::~Runtime()
 
 void Runtime::start()
 {
+    driver_.init();
     for (int i = 0; i < workers_.size(); i++) {
         auto& worker = workers_[i];
         worker.set_num(i);
+        worker.set_runtime(this);
         worker.run();
     }
 }
@@ -59,4 +58,18 @@ Worker& Runtime::get_idl_worker()
 bool Runtime::has_task(void* key)
 {
     return tasks_.contains(key);
+}
+
+Driver& Runtime::get_driver()
+{
+    return driver_;
+}
+
+Runtime* enter_runtime_context() {
+    return rt_context;
+}
+
+void set_runtime_context(Runtime* rt) {
+    assert(rt_context == nullptr);
+    rt_context = rt;
 }

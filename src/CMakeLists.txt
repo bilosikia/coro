@@ -5,6 +5,8 @@ add_library(coro
         runtime/worker.cc
         runtime/driver.cc
         runtime/task.cc
+        io/file.cc
+        io/socket.cc
 )
 
 
