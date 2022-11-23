@@ -1,10 +1,10 @@
 #include "coro/task.h"
 #include "coro/runtime.h"
 
-task<void> promise_type<void>::get_return_object() noexcept
+task<void> task_promise_type<void>::get_return_object() noexcept
 {
     return task {
-        std::experimental::coroutine_handle<promise_type>::from_promise(*this)
+        std::coroutine_handle<task_promise_type>::from_promise(*this)
     };
 }
 

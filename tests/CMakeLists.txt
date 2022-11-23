@@ -19,7 +19,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${DOCTEST_INCLUDE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(${PROJECT_NAME} PRIVATE ${THIRD_PARTY_DIR}/spdlog/include/)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/third_party/spdlog/)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog)
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)

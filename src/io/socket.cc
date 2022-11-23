@@ -59,7 +59,7 @@ Socket Socket::Awaiter::await_resume() noexcept
     return sock;
 }
 
-std::experimental::coroutine_handle<> Socket::Awaiter::await_suspend(std::experimental::coroutine_handle<> coroutine)
+std::coroutine_handle<> Socket::Awaiter::await_suspend(std::coroutine_handle<> coroutine)
 {
     coroutine_handle_ = coroutine;
     Runtime* runtime = enter_runtime_context();
@@ -78,5 +78,5 @@ std::experimental::coroutine_handle<> Socket::Awaiter::await_suspend(std::experi
     };
     driver.add_event(event);
 
-    return std::experimental::noop_coroutine();
+    return std::noop_coroutine();
 }

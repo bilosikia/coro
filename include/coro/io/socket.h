@@ -1,7 +1,7 @@
 #pragma once
 
 #include "coro/task.h"
-#include <experimental/coroutine>
+#include <coroutine>
 #include <sys/socket.h>
 
 class Socket {
@@ -17,13 +17,13 @@ public:
 
     public:
         bool await_ready();
-        std::experimental::coroutine_handle<> await_suspend(std::experimental::coroutine_handle<> coroutine);
+        std::coroutine_handle<> await_suspend(std::coroutine_handle<> coroutine);
         Socket await_resume() noexcept;
 
     private:
-        std::experimental::coroutine_handle<> coroutine_handle_;
+        std::coroutine_handle<> coroutine_handle_;
         int cli_sock_fd_;
-        Socket *ser_sock_;
+        Socket* ser_sock_;
     };
 
 public:
